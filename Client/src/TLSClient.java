@@ -15,14 +15,16 @@ import java.security.cert.CertificateException;
 public class TLSClient {
     private String tlsVersion;
     private String verschlüsselung;
-    private final int PORT = 8080;
+    private final int PORT = 8082;
     private final int SIZE;
     private SSLSocket socket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
+    private String IP = "localhost";
 
     public static void main(String[] args) {
-        TLSClient client = new TLSClient("test","1",25);
+        TLSClient client = new TLSClient("TLSv1.2","1",25);
+
     }
     public TLSClient(String version, String verschlüsselung, int SIZE) {
         this.tlsVersion = version;
@@ -31,29 +33,25 @@ public class TLSClient {
 
 
         try {
-
+            long startTime = System.currentTimeMillis();
             InputStream stream = this.getClass().getResourceAsStream("/sslclienttrust");
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             char[] trustStorePassword = "]3!z2Tb?@EHu%d}Q".toCharArray();
             trustStore.load(stream, trustStorePassword);
-            SSLContext context = SSLContext.getInstance("TLSv1.3");
+            SSLContext context = SSLContext.getInstance(tlsVersion);
             TrustManagerFactory factory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            //TrustManagerFactory factory = TrustManagerFactory.getInstance(verschlüsselung);
+
             factory.init(trustStore);
             TrustManager[] managers = factory.getTrustManagers();
             context.init(null, managers, null);
             SSLContext.setDefault(context);
-            socket = (SSLSocket) context.getSocketFactory().createSocket("localhost", 8082);
-            try {
-                this.out = new ObjectOutputStream(this.socket.getOutputStream());
-            } catch (IOException var4) {
-                var4.printStackTrace();
-
-                try {
-                    this.out.close();
-                } catch (IOException var3) {
-                    var3.printStackTrace();
-                }
-            }
+            socket = (SSLSocket) context.getSocketFactory().createSocket("kiunke.me", 3122);
+            System.out.println("Successfully connected");
+            // this.out = new ObjectOutputStream(this.socket.getOutputStream());
+            long endTime = System.currentTimeMillis();
+            long timeElapsed = endTime - startTime;
+            System.out.println("Elapsed time in milli seconds: " + timeElapsed );
 
         } catch (NoSuchAlgorithmException | KeyManagementException | IOException | KeyStoreException | CertificateException e) {
             e.printStackTrace();

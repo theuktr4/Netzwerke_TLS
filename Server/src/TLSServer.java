@@ -4,7 +4,7 @@ import java.security.KeyStore;
 import javax.net.ssl.*;
 
 public class TLSServer {
-    private int port = 8082;
+    private int port = 3122;
     private boolean isServerDone = false;
 
     public static void main(String[] args){
@@ -71,6 +71,7 @@ public class TLSServer {
                 System.out.println("SSLSession :");
                 System.out.println("\tProtocol : "+sslSession.getProtocol());
                 System.out.println("\tCipher suite : "+sslSession.getCipherSuite());
+
             }
         } catch (Exception ex){
             ex.printStackTrace();
