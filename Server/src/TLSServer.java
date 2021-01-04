@@ -4,7 +4,7 @@ import java.security.KeyStore;
 import javax.net.ssl.*;
 
 public class TLSServer {
-    private int port = 3122;
+    private int port = 8082;
     private boolean isServerDone = false;
 
     public static void main(String[] args){
@@ -36,7 +36,7 @@ public class TLSServer {
             TrustManager[] tm = trustManagerFactory.getTrustManagers();
 
             // Initialize SSLContext
-            SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
+            SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
             sslContext.init(km,  tm, null);
 
             return sslContext;
@@ -64,6 +64,7 @@ public class TLSServer {
             System.out.println("SSL server started");
             while(!isServerDone){
                 SSLSocket sslSocket = (SSLSocket) sslServerSocket.accept();
+                sslSocket.setNeedClientAuth(true);
 
                 // Start the server thread
                 sslSocket.startHandshake();

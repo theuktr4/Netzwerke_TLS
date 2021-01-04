@@ -1,15 +1,9 @@
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.cert.CertificateException;
 
 public class TLSClient {
@@ -36,6 +30,11 @@ public class TLSClient {
             long startTime = System.currentTimeMillis();
             InputStream stream = this.getClass().getResourceAsStream("/sslclienttrust");
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            keyManagerFactory.init(trustStore, "]3!z2Tb?@EHu%d}Q".toCharArray());
+            KeyManager[] km = keyManagerFactory.getKeyManagers();
+
             char[] trustStorePassword = "]3!z2Tb?@EHu%d}Q".toCharArray();
             trustStore.load(stream, trustStorePassword);
             SSLContext context = SSLContext.getInstance(tlsVersion);
@@ -44,16 +43,18 @@ public class TLSClient {
 
             factory.init(trustStore);
             TrustManager[] managers = factory.getTrustManagers();
-            context.init(null, managers, null);
+            context.init(km, managers, null);
             SSLContext.setDefault(context);
-            socket = (SSLSocket) context.getSocketFactory().createSocket("kiunke.me", 3122);
+            socket = (SSLSocket) context.getSocketFactory().createSocket("localhost", 8082);
+            socket.setEnabledProtocols(new String[]{tlsVersion});
+            socket.startHandshake();
             System.out.println("Successfully connected");
-            // this.out = new ObjectOutputStream(this.socket.getOutputStream());
+            this.out = new ObjectOutputStream(this.socket.getOutputStream());
             long endTime = System.currentTimeMillis();
             long timeElapsed = endTime - startTime;
             System.out.println("Elapsed time in milli seconds: " + timeElapsed );
 
-        } catch (NoSuchAlgorithmException | KeyManagementException | IOException | KeyStoreException | CertificateException e) {
+        } catch (NoSuchAlgorithmException | KeyManagementException | IOException | KeyStoreException | CertificateException | UnrecoverableKeyException e) {
             e.printStackTrace();
         }
     }
