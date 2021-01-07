@@ -17,7 +17,11 @@ public class TLSClient {
     private String IP = "localhost";
 
     public static void main(String[] args) {
-        TLSClient client = new TLSClient("TLSv1.2","1",25);
+        while(true){
+            TLSClient client = new TLSClient("TLSv1.2","1",25);
+        }
+
+        //TLSClient client2 = new TLSClient("TLSv1.2","1",25);
 
     }
     public TLSClient(String version, String verschlüsselung, int SIZE) {
@@ -27,14 +31,13 @@ public class TLSClient {
 
 
         try {
-            long startTime = System.currentTimeMillis();
             InputStream stream = this.getClass().getResourceAsStream("/sslclienttrust");
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-
+            /*
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             keyManagerFactory.init(trustStore, "]3!z2Tb?@EHu%d}Q".toCharArray());
             KeyManager[] km = keyManagerFactory.getKeyManagers();
-
+            */
             char[] trustStorePassword = "]3!z2Tb?@EHu%d}Q".toCharArray();
             trustStore.load(stream, trustStorePassword);
             SSLContext context = SSLContext.getInstance(tlsVersion);
@@ -43,18 +46,23 @@ public class TLSClient {
 
             factory.init(trustStore);
             TrustManager[] managers = factory.getTrustManagers();
-            context.init(km, managers, null);
+            context.init(null, managers, null);
             SSLContext.setDefault(context);
+
+
             socket = (SSLSocket) context.getSocketFactory().createSocket("localhost", 8082);
             socket.setEnabledProtocols(new String[]{tlsVersion});
+            long startTime = System.currentTimeMillis();
             socket.startHandshake();
-            System.out.println("Successfully connected");
-            this.out = new ObjectOutputStream(this.socket.getOutputStream());
+            System.out.println(socket.getSession().getId());
             long endTime = System.currentTimeMillis();
             long timeElapsed = endTime - startTime;
-            System.out.println("Elapsed time in milli seconds: " + timeElapsed );
+            System.out.println("Time Handshake " + timeElapsed );
+            System.out.println("Successfully connected");
+            this.out = new ObjectOutputStream(this.socket.getOutputStream());
 
-        } catch (NoSuchAlgorithmException | KeyManagementException | IOException | KeyStoreException | CertificateException | UnrecoverableKeyException e) {
+
+        } catch (NoSuchAlgorithmException | KeyManagementException | IOException | KeyStoreException | CertificateException e) {
             e.printStackTrace();
         }
     }
